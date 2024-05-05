@@ -74,6 +74,13 @@ function FirebaseProvider({ children }) {
 
     const [{ name, email, password, sign, loadings, heading }, dispatch] = useReducer(reducer, initialState);
 
+    const validateForm = () => {
+        const emailRegex = /\\\\S+@\\\\S+\\\\.\\\\S+/;
+        const isEmailValid = emailRegex.test(email);
+        const isPasswordValid = password.length > 6;
+        return isEmailValid && isPasswordValid;
+    };
+
     const createUser = () => {
         if (sign === 'signin') {
             dispatch({ type: "heading", payload: "Sign Up" })
@@ -82,14 +89,10 @@ function FirebaseProvider({ children }) {
         }
         dispatch({ type: "loadings", payload: true })
         // setLoadings(true);
-        if (!email.includes('@')) {
-            alert('Please enter a valid email address');
+        if (!validateForm()) {
+            alert("Please enter a valid email and password.");
             dispatch({ type: "loadings", payload: false })
-            return;
-        }
-        if (password.length < 8) {
-            alert('Password must be at least 6 characters');
-            dispatch({ type: "loadings", payload: false })
+
             return;
         }
         createUserWithEmailAndPassword(firebaseAuth, email, password)
@@ -119,6 +122,12 @@ function FirebaseProvider({ children }) {
             return;
         }
         dispatch({ type: "loadings", payload: true })
+        if (!validateForm()) {
+            alert("Please enter a valid email and password.");
+            dispatch({ type: "loadings", payload: false })
+
+            return;
+        }
         signInWithEmailAndPassword(firebaseAuth, email, password)
             .then((value) => {
                 console.log(value);
