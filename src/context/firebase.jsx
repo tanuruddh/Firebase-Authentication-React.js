@@ -12,6 +12,7 @@ const firebaseConfig = {
     appId: process.env.REACT_APP_APPID,
     databaseURL: process.env.REACT_APP_DATABASEURL
 };
+
 const FirebaseContext = createContext();
 const app = initializeApp(firebaseConfig);
 const firebaseAuth = getAuth(app);
