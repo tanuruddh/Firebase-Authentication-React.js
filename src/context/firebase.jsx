@@ -4,13 +4,13 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, Go
 
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAHS6AUEudbZR8F_I3r50yA3hgM4J3mh2U",
-    authDomain: "login-signup-39e4f.firebaseapp.com",
-    projectId: "login-signup-39e4f",
-    storageBucket: "login-signup-39e4f.appspot.com",
-    messagingSenderId: "525945637152",
-    appId: "1:525945637152:web:9d76d46fc1a36cb6c4af45",
-    databaseURL: "https://console.firebase.google.com/project/login-signup-39e4f/database/login-signup-39e4f-default-rtdb/data/~2F"
+    apiKey: process.env.REACT_APP_APIKEY,
+    authDomain: process.env.REACT_APP_AUTHDOMAIN,
+    projectId: process.env.REACT_APP_PROJECTID,
+    storageBucket: process.env.REACT_APP_STORAGEBUCKET,
+    messagingSenderId: process.env.REACT_APP_MESSAGINGSENDERID,
+    appId: process.env.REACT_APP_APPID,
+    databaseURL: process.env.REACT_APP_DATABASEURL
 };
 const FirebaseContext = createContext();
 const app = initializeApp(firebaseConfig);
@@ -75,9 +75,10 @@ function FirebaseProvider({ children }) {
     const [{ name, email, password, sign, loadings, heading }, dispatch] = useReducer(reducer, initialState);
 
     const validateForm = () => {
-        const emailRegex = /\\\\S+@\\\\S+\\\\.\\\\S+/;
+        const emailRegex = /\S+@\S+\.\S+/
         const isEmailValid = emailRegex.test(email);
         const isPasswordValid = password.length > 6;
+        console.log(isEmailValid, isPasswordValid)
         return isEmailValid && isPasswordValid;
     };
 
