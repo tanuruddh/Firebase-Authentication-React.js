@@ -1,12 +1,20 @@
-import Spinner from "./Spinner";
+import { useNavigate } from "react-router-dom";
+import Spinner from "../components/Spinner";
 import { useFirebase } from "../context/firebase.jsx";
+import { useEffect } from "react";
 
 // import axios from "axios";
 
 
 export default function Login() {
   // PRE-FILL FOR DEV PURPOSES
-  const { name, email, password, sign, loadings, heading, loginUser, createUser, dispatch, signUpWithGoogle, signUpWithFacebook } = useFirebase();
+  const { name, email, password, sign, loadings, heading, loginUser, createUser, dispatch, signUpWithGoogle, signUpWithFacebook, token } = useFirebase();
+  const navigate = useNavigate();
+  useEffect(function () {
+    if (token) {
+      navigate("/info")
+    }
+  }, [navigate, token])
 
   return (
     <main className='.login'>
@@ -16,10 +24,10 @@ export default function Login() {
           <div className="google">
             <div className="google-btn">
               <div className="google-icon-wrapper" onClick={signUpWithGoogle}>
-                <i class="fa-brands fa-google"></i>
+                <i className="fa-brands fa-google"></i>
               </div>
               <div className="google-icon-wrapper" onClick={signUpWithFacebook}>
-                <i class="fa-brands fa-facebook-f"></i>
+                <i className="fa-brands fa-facebook-f"></i>
               </div>
             </div>
             <p className="btn-text">
