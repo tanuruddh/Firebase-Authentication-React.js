@@ -23,7 +23,6 @@ function Info() {
         localStorage.setItem('phone', phone);
         localStorage.setItem('photo', photo);
         localStorage.setItem('coverPhoto', coverPhoto);
-        console.log(dob, gender, phone, email, name)
         await storeUserDetails(name, email, dob, photo, coverPhoto, phone, gender);
         const res = await getUserDetails(email)
         if (res) {

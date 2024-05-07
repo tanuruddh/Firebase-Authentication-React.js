@@ -10,7 +10,6 @@ function useAuth() {
 
     const logout = () => {
         localStorage.removeItem('token');
-        console.log("ascd")
         dispatch({ type: "token", payload: null });
     };
 

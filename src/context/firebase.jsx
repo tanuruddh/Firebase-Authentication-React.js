@@ -146,7 +146,6 @@ function FirebaseProvider({ children }) {
         const emailRegex = /\S+@\S+\.\S+/
         const isEmailValid = emailRegex.test(email);
         const isPasswordValid = password.length > 6;
-        console.log(isEmailValid, isPasswordValid)
         return isEmailValid && isPasswordValid;
     };
 
@@ -168,7 +167,6 @@ function FirebaseProvider({ children }) {
             .then((userCredential) => {
                 // Signed in
                 var user = userCredential.user;
-                console.log(userCredential);
                 login(user.accessToken)
                 localStorage.setItem('email', email);
                 localStorage.setItem('name', name);
@@ -236,7 +234,6 @@ function FirebaseProvider({ children }) {
         signInWithPopup(firebaseAuth, facebookProvider)
             .then((result) => {
                 const user = result.user;
-                console.log(user)
             })
             .catch((error) => {
                 console.log(error.message)
@@ -250,7 +247,6 @@ function FirebaseProvider({ children }) {
 
     const logout = () => {
         localStorage.removeItem('token');
-        console.log("ascd")
         localStorage.setItem('name', "");
         localStorage.setItem('email', "");
         localStorage.setItem('token', "");
@@ -272,7 +268,6 @@ function FirebaseProvider({ children }) {
         await uploadBytes(coverPhotoRef, coverPhoto);
         const coverPhotoUrl = await getDownloadURL(coverPhotoRef);
 
-        console.log(coverPhotoUrl);
         return await addDoc(collection(firestore, "users"), {
             name,
             email,
@@ -295,7 +290,6 @@ function FirebaseProvider({ children }) {
                 return null;
             }
             // Assuming there's only one document for each email
-            console.log(querySnapshot.docs[0].data())
             return querySnapshot.docs[0].data();
         } catch (error) {
             console.error("Error fetching document: ", error);
