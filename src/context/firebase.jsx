@@ -1,7 +1,7 @@
 import { createContext, useContext, useReducer } from "react";
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
-import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { getFirestore, collection, addDoc, query, where, getDocs } from "firebase/firestore";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, FacebookAuthProvider } from "firebase/auth";
 
 
@@ -23,6 +23,19 @@ const facebookProvider = new FacebookAuthProvider();
 const firestore = getFirestore(app);
 const storage = getStorage(app);
 
+const resetState = {
+    name: "",
+    email: "",
+    password: "",
+    sign: "signin",
+    loadings: false,
+    token: "",
+    dob: "",
+    gender: "male",
+    phone: "",
+    photo: null,
+    coverPhoto: null
+}
 
 const initialState = {
     heading: "Sign In",
@@ -43,18 +56,21 @@ const initialState = {
 const reducer = (state, action) => {
     switch (action.type) {
         case "reset":
-            return initialState
+            return resetState
         case "name":
+            localStorage.setItem('name', action.payload);
             return {
                 ...state,
                 name: action.payload
             }
         case "email":
+            localStorage.setItem('email', action.payload);
             return {
                 ...state,
                 email: action.payload
             }
         case "token":
+            localStorage.setItem('token', action.payload);
             return {
                 ...state,
                 token: action.payload
@@ -75,26 +91,36 @@ const reducer = (state, action) => {
                 loadings: action.payload
             }
         case "dob":
+            localStorage.setItem('dob', action.payload);
+
             return {
                 ...state,
                 dob: action.payload
             }
         case "phone":
+            localStorage.setItem('phone', action.payload);
+
             return {
                 ...state,
                 phone: action.payload
             }
         case "gender":
+            localStorage.setItem('gender', action.payload);
+
             return {
                 ...state,
                 gender: action.payload
             }
         case "photo":
+            localStorage.setItem('photo', action.payload);
+
             return {
                 ...state,
                 photo: action.payload
             }
         case "coverPhoto":
+            localStorage.setItem('coverPhoto', action.payload);
+
             return {
                 ...state,
                 coverPhoto: action.payload
@@ -142,6 +168,7 @@ function FirebaseProvider({ children }) {
             .then((userCredential) => {
                 // Signed in
                 var user = userCredential.user;
+                console.log(userCredential);
                 login(user.accessToken)
                 localStorage.setItem('email', email);
                 localStorage.setItem('name', name);
@@ -232,30 +259,52 @@ function FirebaseProvider({ children }) {
         localStorage.setItem('phone', "");
         localStorage.setItem('photo', "");
         localStorage.setItem('coverPhoto', "");
-        dispatch({ type: "token", payload: null });
-        dispatch({ type: "reset", payload: initialState });
+        dispatch({ type: "token", payload: "" });
+        dispatch({ type: "reset" });
     };
 
     const storeUserDetails = async (name, email, dob, photo, coverPhoto, phone, gender) => {
         const photoRef = ref(storage, `uploads/images/${Date.now()}`);
-        const coverPhotoRef = ref(storage, `uploads/images/${Date.now()}`);
-        const photoUrl = await uploadBytes(photoRef, photo);
-        const coverPhotoUrl = await uploadBytes(coverPhotoRef, coverPhoto);
+        await uploadBytes(photoRef, photo);
+        const photoUrl = await getDownloadURL(photoRef);
+
+        const coverPhotoRef = ref(storage, `uploads/images/12${Date.now()}`);
+        await uploadBytes(coverPhotoRef, coverPhoto);
+        const coverPhotoUrl = await getDownloadURL(coverPhotoRef);
+
+        console.log(coverPhotoUrl);
         return await addDoc(collection(firestore, "users"), {
             name,
             email,
             gender,
             dob,
             phone,
-            photo: photoUrl.ref.fullPath,
-            coverPhoto: coverPhotoUrl.ref.fullPath,
+            photo: photoUrl,
+            coverPhoto: coverPhotoUrl,
 
         })
 
     }
 
+    const getUserDetails = async (email) => {
+        try {
+            const q = query(collection(firestore, "users"), where("email", "==", email));
+            const querySnapshot = await getDocs(q);
+            if (querySnapshot.empty) {
+                console.log('No matching documents.');
+                return null;
+            }
+            // Assuming there's only one document for each email
+            console.log(querySnapshot.docs[0].data())
+            return querySnapshot.docs[0].data();
+        } catch (error) {
+            console.error("Error fetching document: ", error);
+            return null;
+        }
+    }
+
     return (
-        <FirebaseContext.Provider value={{ createUser, loginUser, name, email, password, sign, loadings, heading, dispatch, signUpWithGoogle, signUpWithFacebook, token, login, logout, dob, gender, phone, photo, coverPhoto, storeUserDetails }}>
+        <FirebaseContext.Provider value={{ createUser, loginUser, name, email, password, sign, loadings, heading, dispatch, signUpWithGoogle, signUpWithFacebook, token, login, logout, dob, gender, phone, photo, coverPhoto, storeUserDetails, getUserDetails }}>
             {children}
         </FirebaseContext.Provider>
     )

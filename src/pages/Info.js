@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 
 function Info() {
-    const { email, name, logout, token, dispatch, dob, gender, phone, photo, coverPhoto, storeUserDetails } = useFirebase();
+    const { email, name, logout, token, dispatch, dob, gender, phone, photo, coverPhoto, storeUserDetails, getUserDetails } = useFirebase();
     const navigate = useNavigate()
 
     const handlePhotoChange = (event) => {
@@ -16,7 +16,7 @@ function Info() {
         dispatch({ type: "coverPhoto", payload: file })
     };
 
-    const handleform = (e) => {
+    const handleform = async (e) => {
         e.preventDefault();
         localStorage.setItem('dob', dob);
         localStorage.setItem('gender', gender);
@@ -24,13 +24,47 @@ function Info() {
         localStorage.setItem('photo', photo);
         localStorage.setItem('coverPhoto', coverPhoto);
         console.log(dob, gender, phone, email, name)
-        storeUserDetails(name, email, dob, photo, coverPhoto, phone, gender);
+        await storeUserDetails(name, email, dob, photo, coverPhoto, phone, gender);
+        const res = await getUserDetails(email)
+        if (res) {
+            dispatch({ type: "dob", payload: res.dob })
+            dispatch({ type: "gender", payload: res.gender })
+            dispatch({ type: "phone", payload: res.phone })
+            dispatch({ type: "photo", payload: res.photo })
+            dispatch({ type: "coverPhoto", payload: res.coverPhoto })
+            dispatch({ type: "name", payload: res.name })
+            dispatch({ type: "email", payload: res.email })
+            navigate('/');
+        }
+
     }
+
     useEffect(function () {
+
         if (!token) {
             navigate('/login');
         }
-    }, [token, navigate])
+
+
+    }, [token, navigate]);
+
+    useEffect(function () {
+        async function fetchData() {
+            const res = await getUserDetails(email)
+
+            if (res) {
+                dispatch({ type: "dob", payload: res.dob })
+                dispatch({ type: "gender", payload: res.gender })
+                dispatch({ type: "phone", payload: res.phone })
+                dispatch({ type: "photo", payload: res.photo })
+                dispatch({ type: "coverPhoto", payload: res.coverPhoto })
+                dispatch({ type: "name", payload: res.name })
+                dispatch({ type: "email", payload: res.email })
+                navigate('/');
+            }
+        }
+        fetchData();
+    }, [dispatch, getUserDetails, email, navigate,])
     return (
         <div className="bg bg-slate-500 pt-10 flex  justify-center min-h-[100vh]">
             <div className="w-[100px] absolute  right-10 bg-black text-white flex text-center align-center justify-center h-[30px] rounded-md mb-9 ml-[100px]">
